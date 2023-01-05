@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use components::{Movable, Velocity};
 use player::PlayerPlugin;
 
 mod components;
@@ -7,6 +8,8 @@ mod player;
 const PLAYER_SPRITE: &str = "player_b_01.png";
 const PLAYER_SIZE: (f32, f32) = (98.0, 75.0);
 const SPRITE_SCALE: f32 = 1.0;
+const PLAYER_LASER_SPRITE : &str = "laser_a_01.png";
+const PLAYER_LASER_SIZE : (f32, f32) = (9.0, 54.0);
 
 const TIME_STEP: f32 = 1.0 / 60.0;
 const BASE_SPEED: f32 = 500.0;
@@ -20,7 +23,8 @@ pub struct WinSize{
 
 #[derive(Resource)]
 pub struct GameTextures{
-    player: Handle<Image>
+    player: Handle<Image>,
+    player_laser: Handle<Image>
 }
 
 fn main() {
@@ -38,6 +42,7 @@ fn main() {
 		}))
         .add_plugin(PlayerPlugin)
         .add_startup_system(setup_system)
+        .add_system(movable_system)
         .run();
     
 }
@@ -55,8 +60,28 @@ fn setup_system(mut commands: Commands, asset_server: Res<AssetServer>, mut wind
 
     // add GameTextures
     let game_textures = GameTextures{
-        player : asset_server.load(PLAYER_SPRITE)
+        player : asset_server.load(PLAYER_SPRITE),
+        player_laser : asset_server.load(PLAYER_LASER_SPRITE),
     };
     commands.insert_resource(game_textures);
-    
+}
+
+fn movable_system(mut commands : Commands, win_size : Res<WinSize>, mut query: Query<(Entity, &Velocity, &mut Transform, &Movable)>){
+    for (entity, velocity, mut transform, movable) in query.iter_mut(){
+        let translation = &mut transform.translation;
+        *translation += Vec3::new(velocity.x, velocity.y, 0.0).normalize_or_zero() * BASE_SPEED * TIME_STEP;
+        //translation.x += velocity.x * BASE_SPEED * TIME_STEP;
+        //translation.y += velocity.y * BASE_SPEED * TIME_STEP; 
+
+        if movable.auto_despawn{
+            const MARGIN: f32 = 200.0;
+            if translation.y > win_size.height / 2.0 + MARGIN
+            || translation.y < -win_size.height / 2.0 - MARGIN
+            || translation.x > win_size.width / 2.0 + MARGIN
+            || translation.x < -win_size.width / 2.0 - MARGIN
+            {
+                commands.entity(entity).despawn();
+            }
+        }
+    }
 }
