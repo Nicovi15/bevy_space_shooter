@@ -1,4 +1,4 @@
-use crate::{GameTextures, WinSize, PLAYER_SIZE, SPRITE_SCALE, components::{Player, Velocity, Movable}, BASE_SPEED, TIME_STEP};
+use crate::{GameTextures, WinSize, PLAYER_SIZE, SPRITE_SCALE, components::{Player, Velocity, Movable, SpriteSize, Enemy}, BASE_SPEED, TIME_STEP, ENEMY_SIZE};
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
@@ -25,5 +25,7 @@ fn enemy_spawn_system(mut commands: Commands, game_textures: Res<GameTextures>, 
             ..Default::default()
         },
         ..Default::default()
-    });
+    })
+    .insert(Enemy)
+    .insert(SpriteSize::from(ENEMY_SIZE));
 }

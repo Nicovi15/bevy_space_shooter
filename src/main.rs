@@ -1,5 +1,6 @@
-use bevy::prelude::*;
-use components::{Movable, Velocity};
+use bevy::{prelude::*, sprite::collide_aabb::collide, prelude::Vec3};
+use bevy::math::Vec3Swizzles;
+use components::{Movable, Velocity, SpriteSize, Enemy, FromPlayer, Laser};
 use player::PlayerPlugin;
 use enemy::EnemyPlugin;
 
@@ -13,6 +14,7 @@ const SPRITE_SCALE: f32 = 1.0;
 const PLAYER_LASER_SPRITE : &str = "laser_a_01.png";
 const PLAYER_LASER_SIZE : (f32, f32) = (9.0, 54.0);
 const ENEMY_SPRITE : &str = "enemy_a_01.png";
+const ENEMY_SIZE : (f32, f32) = (93.0, 84.0);
 
 const TIME_STEP: f32 = 1.0 / 60.0;
 const BASE_SPEED: f32 = 500.0;
@@ -48,6 +50,7 @@ fn main() {
         .add_plugin(EnemyPlugin)
         .add_startup_system(setup_system)
         .add_system(movable_system)
+        .add_system(player_laser_hit_enemy_system)
         .run();
     
 }
@@ -87,6 +90,28 @@ fn movable_system(mut commands : Commands, win_size : Res<WinSize>, mut query: Q
             || translation.x < -win_size.width / 2.0 - MARGIN
             {
                 commands.entity(entity).despawn();
+            }
+        }
+    }
+}
+
+fn player_laser_hit_enemy_system(
+    mut commands : Commands,
+    laser_query: Query<(Entity, &Transform, &SpriteSize), (With<Laser>, With<FromPlayer>)>,
+    enemy_query: Query<(Entity, &Transform, &SpriteSize), With<Enemy>>
+)
+{
+    for (laser_entity, laser_tf, laser_size) in laser_query.iter(){
+        let laser_scale = Vec2::from(laser_tf.scale.xy());
+
+        for (enemy_entity, enemy_tf, enemy_size) in enemy_query.iter(){
+            let enemy_scale = Vec2::from(enemy_tf.scale.xy());
+
+            let collision = collide(laser_tf.translation, laser_size.0 * laser_scale, enemy_tf.translation, enemy_size.0 * enemy_scale);
+
+            if let Some(_) = collision{
+                commands.entity(enemy_entity).despawn();
+                commands.entity(laser_entity).despawn();
             }
         }
     }
