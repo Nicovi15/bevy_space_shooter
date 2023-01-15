@@ -35,4 +35,7 @@ impl From<(f32, f32)> for SpriteSize {
     }
 }
 
+#[derive(Component)]
+pub struct MainCamera;
+
 

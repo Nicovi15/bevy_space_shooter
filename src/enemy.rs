@@ -1,4 +1,4 @@
-use crate::{GameTextures, WinSize, PLAYER_SIZE, SPRITE_SCALE, components::{Player, Velocity, Movable, SpriteSize, Enemy}, BASE_SPEED, TIME_STEP, ENEMY_SIZE};
+use crate::{GameTextures, WinSize, SPRITE_SCALE, components::{SpriteSize, Enemy}, ENEMY_SIZE};
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 

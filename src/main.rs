@@ -1,6 +1,6 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide, prelude::Vec3};
 use bevy::math::Vec3Swizzles;
-use components::{Movable, Velocity, SpriteSize, Enemy, FromPlayer, Laser};
+use components::{Movable, Velocity, SpriteSize, Enemy, FromPlayer, Laser, MainCamera};
 use player::PlayerPlugin;
 use enemy::EnemyPlugin;
 
@@ -16,7 +16,7 @@ const PLAYER_LASER_SIZE : (f32, f32) = (9.0, 54.0);
 const ENEMY_SPRITE : &str = "enemy_a_01.png";
 const ENEMY_SIZE : (f32, f32) = (93.0, 84.0);
 
-const TIME_STEP: f32 = 1.0 / 60.0;
+//const TIME_STEP: f32 = 1.0 / 60.0;
 const BASE_SPEED: f32 = 500.0;
 
 // Ressources 
@@ -57,7 +57,7 @@ fn main() {
 
 fn setup_system(mut commands: Commands, asset_server: Res<AssetServer>, mut windows: ResMut<Windows>){
     // Camera
-    commands.spawn(Camera2dBundle::default());
+    commands.spawn((Camera2dBundle::default(), MainCamera));
 
     // Capture window size
     let window = windows.get_primary_mut().unwrap();
@@ -75,10 +75,10 @@ fn setup_system(mut commands: Commands, asset_server: Res<AssetServer>, mut wind
     commands.insert_resource(game_textures);
 }
 
-fn movable_system(mut commands : Commands, win_size : Res<WinSize>, mut query: Query<(Entity, &Velocity, &mut Transform, &Movable)>){
+fn movable_system(mut commands : Commands, win_size : Res<WinSize>, mut query: Query<(Entity, &Velocity, &mut Transform, &Movable)>, time: Res<Time>){
     for (entity, velocity, mut transform, movable) in query.iter_mut(){
         let translation = &mut transform.translation;
-        *translation += Vec3::new(velocity.x, velocity.y, 0.0).normalize_or_zero() * BASE_SPEED * TIME_STEP;
+        *translation += Vec3::new(velocity.x, velocity.y, 0.0).normalize_or_zero() * BASE_SPEED * time.delta_seconds();
         //translation.x += velocity.x * BASE_SPEED * TIME_STEP;
         //translation.y += velocity.y * BASE_SPEED * TIME_STEP; 
 
