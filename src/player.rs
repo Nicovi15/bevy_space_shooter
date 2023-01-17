@@ -21,7 +21,7 @@ fn player_spawn_system(mut commands : Commands, game_textures: Res<GameTextures>
         texture : game_textures.player.clone(),
         transform: Transform{
             translation: Vec3::new(0.0, bottom + PLAYER_SIZE.1 / 2.0 * SPRITE_SCALE + 5.0, 10.0),
-            scale: Vec3::new(SPRITE_SCALE, SPRITE_SCALE, 1.0),
+            scale: Vec3::new(0.3, 0.3, 1.0),
             ..Default::default()
         },
          ..Default::default()
@@ -48,7 +48,7 @@ fn player_fire_system(mut commands : Commands, kb : Res<Input<KeyCode>>, game_te
     if let Ok(player_tf) = query.get_single(){
         if kb.just_pressed(KeyCode::Space){
             let (x,y) = (player_tf.translation.x, player_tf.translation.y);
-            let x_offset = PLAYER_SIZE.0 / 2.0 * SPRITE_SCALE - 12.5;
+            let x_offset = PLAYER_SIZE.0 / 6.0 * SPRITE_SCALE - 12.5;
             let y_offset = 10.0;
             let direction = player_tf.up();
             let angle = player_tf.rotation.to_euler(EulerRot::XYZ).2;
@@ -118,3 +118,4 @@ fn rotate_player_to_cursor(
         }
     }
 }
+

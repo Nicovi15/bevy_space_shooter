@@ -1,6 +1,6 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide, prelude::Vec3};
 use bevy::math::Vec3Swizzles;
-use components::{Movable, Velocity, SpriteSize, Enemy, FromPlayer, Laser, MainCamera};
+use components::{Movable, Velocity, SpriteSize, Enemy, FromPlayer, Laser, MainCamera, Player};
 use player::PlayerPlugin;
 use enemy::EnemyPlugin;
 
@@ -8,8 +8,8 @@ mod components;
 mod player;
 mod enemy;
 
-const PLAYER_SPRITE: &str = "player_b_01.png";
-const PLAYER_SIZE: (f32, f32) = (98.0, 75.0);
+const PLAYER_SPRITE: &str = "player.png";
+const PLAYER_SIZE: (f32, f32) = (300.0, 300.0);
 const SPRITE_SCALE: f32 = 1.0;
 const PLAYER_LASER_SPRITE : &str = "laser_a_01.png";
 const PLAYER_LASER_SIZE : (f32, f32) = (9.0, 54.0);
@@ -51,6 +51,7 @@ fn main() {
         .add_startup_system(setup_system)
         .add_system(movable_system)
         .add_system(player_laser_hit_enemy_system)
+        .add_system(camera_following_system.after(movable_system))
         .run();
     
 }
@@ -115,4 +116,20 @@ fn player_laser_hit_enemy_system(
             }
         }
     }
+}
+
+fn camera_following_system(
+    mut q_camera: Query<(&mut GlobalTransform), With<MainCamera>>,
+    q_player: Query<&mut Transform, With<Player>>
+)
+{
+    let mut camera_transform = q_camera.single_mut();
+    let player_transform = q_player.single();
+
+    let mut cam_trans = camera_transform.translation_mut();
+    cam_trans.x = player_transform.translation.x;
+    cam_trans.y = player_transform.translation.y;
+
+    println!("{}", camera_transform.translation());
+
 }
